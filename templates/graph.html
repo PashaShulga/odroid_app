@@ -1,16 +1,20 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <style type="text/css">
-      body {
-        background-color: #000000;
-        color: #eeeeee;
-        font-family: tahoma, arial, sans-serif;
-      }
-    </style>
-    <script type="text/javascript" src="../static/js/smoothie.js"></script>
-    <script type="text/javascript" src="../static/js/main.js"></script>
-    <script type="text/javascript" src="//code.jquery.com/jquery-1.4.2.min.js"></script>
+
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+    <script type="text/javascript" src="../static/js/jquery.jqplot.js"></script>
+    <script type="text/javascript" src="../static/js/plugins/jqplot.dateAxisRenderer.js"></script>
+    <script type="text/javascript" src="../static/js/plugins/jqplot.logAxisRenderer.js"></script>
+    <script type="text/javascript" src="../static/js/plugins/jqplot.canvasTextRenderer.js"></script>
+    <script type="text/javascript" src="../static/js/plugins/jqplot.canvasAxisTickRenderer.js"></script>
+    <script type="text/javascript" src="../static/js/plugins/jqplot.highlighter.js"></script>
+{#      <script type="text/javascript" src="../static/js/websocket.js"></script>#}
+    <link rel="stylesheet" type="text/css" href="../static/js/jquery.jqplot.css" />
+    <link rel="stylesheet" type="text/css" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.10.0/themes/smoothness/jquery-ui.css" />
+
+{#    <script type="text/javascript" src="../static/js/main.js"></script>#}
+{#    <script type="text/javascript" src="//code.jquery.com/jquery-1.4.2.min.js"></script>#}
     <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/socket.io/1.3.5/socket.io.min.js"></script>
           <script type="text/javascript" charset="utf-8">
         $(document).ready(function(){
@@ -33,26 +37,6 @@
                 socket.emit('my event', {data: $('#emit_data').val()});
                 return false;
             });
-            $('form#broadcast').submit(function(event) {
-                socket.emit('my broadcast event', {data: $('#broadcast_data').val()});
-                return false;
-            });
-            $('form#join').submit(function(event) {
-                socket.emit('join', {room: $('#join_room').val()});
-                return false;
-            });
-            $('form#leave').submit(function(event) {
-                socket.emit('leave', {room: $('#leave_room').val()});
-                return false;
-            });
-            $('form#send_room').submit(function(event) {
-                socket.emit('my room event', {room: $('#room_name').val(), data: $('#room_data').val()});
-                return false;
-            });
-            $('form#close').submit(function(event) {
-                socket.emit('close room', {room: $('#close_room').val()});
-                return false;
-            });
             $('form#disconnect').submit(function(event) {
                 socket.emit('disconnect request');
                 return false;
@@ -60,10 +44,129 @@
         });
     </script>
   </head>
-  <body onload="init()">
+  <body>
 
-    <h4>host1.example.com</h4>
-    <canvas id="host1Cpu" width="900" height="500"></canvas>
+     <div class="ui-widget ui-corner-all">
+        <div class="ui-widget-header ui-corner-top">Hi Powered Data</div>
+        <div class="ui-widget-content ui-corner-bottom" >
+            <div id="chart1"></div>
+        </div>
+    </div>
+<pre class="code brush:js"></pre>
+<div id="subscribe"></div>
+     <script class="code" type="text/javascript">
+         var socket = new WebSocket('ws://localhost:8765');
+
+        $(document).ready(function () {
+            $.jqplot._noToImageButton = true;
+
+            socket.onmessage = function(event) {
+              return event.data;
+            };
+
+            socket.onerror = function(error) {
+              alert("Ошибка " + error.message);
+            };
+
+            document.forms.onsubmit = function() {
+              var outgoingMessage = this.message.value;
+
+              socket.send(outgoingMessage);
+              return false;
+            };
+
+            // показать сообщение в div#subscribe
+            function showMessage(message) {
+              var messageElem = document.createElement('div');
+              messageElem.appendChild(document.createTextNode(message));
+              document.getElementById('subscribe').appendChild(messageElem);
+            }
+
+            // обработчик входящих сообщений
+{#            socket.onmessage = function(event) {#}
+{#                var currYear = [event.data];#}
+{#                showMessage(incomingMessage);#}
+{#            };#}
+            alert(socket.onmessage);
+
+            var plot1 = $.jqplot("chart1", [socket.onmessage], {
+                seriesColors: ["rgba(78, 135, 194, 0.7)", "rgb(211, 235, 59)"],
+                title: 'Monthly TurnKey Revenue',
+                highlighter: {
+                    show: true,
+                    sizeAdjust: 1,
+                    tooltipOffset: 9
+                },
+                grid: {
+                    background: 'rgba(57,57,57,0.0)',
+                    drawBorder: false,
+                    shadow: true,
+                    gridLineColor: '#666666',
+                    gridLineWidth: 2
+                },
+                legend: {
+                    show: true,
+                    placement: 'outside'
+                },
+                seriesDefaults: {
+                    rendererOptions: {
+                        smooth: true,
+                        animation: {
+                            show: true
+                        }
+                    },
+                    showMarker: false
+                },
+                series: [
+                    {
+                        fill: true,
+                        label: '2010'
+                    },
+                    {
+                        label: '2011'
+                    }
+                ],
+                axesDefaults: {
+                    rendererOptions: {
+                        baselineWidth: 1.5,
+                        baselineColor: '#444444',
+                        drawBaseline: false
+                    }
+                },
+                axes: {
+                    xaxis: {
+                        renderer: $.jqplot.DateAxisRenderer,
+                        tickRenderer: $.jqplot.CanvasAxisTickRenderer,
+                        tickOptions: {
+                            formatString: "%b %e",
+                            angle: -30,
+                            textColor: '#dddddd'
+                        },
+                        min: "2011-08-01",
+                        max: "2011-09-30",
+                        tickInterval: "now",
+                        drawMajorGridlines: false
+                    },
+                    yaxis: {
+                        renderer: $.jqplot.LogAxisRenderer,
+                        pad: 0,
+                        rendererOptions: {
+                            minorTicks: 1
+                        },
+                        tickOptions: {
+                            formatString: "$%'d",
+                            showMark: false
+                        }
+                    }
+                }
+            });
+
+              $('.jqplot-highlighter-tooltip').addClass('ui-corner-all')
+        });
+
+
+    </script>
+
 
       <h1>Flask-SocketIO Test</h1>
     <h2>Send:</h2>
