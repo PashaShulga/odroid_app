@@ -1,32 +1,54 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE HTML>
+<html>
 <head>
-    <meta charset="UTF-8">
-
-        <script type="text/javascript" src="../static/js/main.js"></script>
-    <link href="../static/flot/examples/examples.css" rel="stylesheet" type="text/css">
-	<!--[if lte IE 8]><script language="javascript" type="text/javascript" src="../../excanvas.min.js"></script><![endif]-->
-	<script language="javascript" type="text/javascript" src="../static/flot/jquery.js"></script>
-	<script language="javascript" type="text/javascript" src="../static/flot/jquery.flot.js"></script>
-
+    <script type="text/javascript" src="../static/js/canvasjs.min.js"></script>
 </head>
 <body>
-
-<div id="content">
-
-		<div class="demo-container">
-			<div id="placeholder" class="demo-placeholder"></div>
-		</div>
-
+	<div id="chartContainer" style="height: 300px; width:80%;">
 	</div>
 
-<!-- форма для отправки сообщений -->
-<form name="publish">
-  <input type="text" name="message">
-  <input type="submit" value="Отправить">
-</form>
+	<script type="text/javascript">
+	(function () {
+  		'use strict';
 
-<!-- здесь будут появляться входящие сообщения -->
-<div id="subscribe"></div>
+    	var socket = new WebSocket('ws://localhost:8765');
+
+    	var MAX_X_POINTS_LEN = 25;
+    	var updateInterval = 500;
+		var dataPoints = []; // dataPoints
+
+		var chart = new CanvasJS.Chart("chartContainer",{
+			title :{
+			text: "Live Data"
+			},
+			data: [{
+				type: "line",
+				dataPoints: dataPoints
+			}]
+		});
+
+
+  	  	socket.onmessage = function(event) {
+   	    	var points = JSON.parse(event.data || {});
+
+        	dataPoints.push({
+            	x: +points[0] || 0,
+            	y: +points[1] || 0
+       		});
+    	};
+
+    	function reRenderChart () {
+    		var extraLen = MAX_X_POINTS_LEN - dataPoints.length;
+    		if (extraLen < 0) {
+    			dataPoints.splice(0, -extraLen);
+        	}
+
+        	chart.render();
+    	}
+
+    	setInterval(reRenderChart, updateInterval);
+
+    }());
+    </script>
 </body>
 </html>

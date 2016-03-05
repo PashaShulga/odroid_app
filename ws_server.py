@@ -2,17 +2,10 @@ import websockets
 import asyncio
 import time
 import json
-val = [-5.5,-4.7,-4.1,-3.5,-3.2,-2.4,-2.8,-1.7,-1.2,-0.9,-0.7,-0.4,-0.4,-0.3,0.2,0.2,0.3,0.3,-0.7,-0.9]
-
-
-def points():
-    list_ = []
-    for item in val:
-        list_.append(item)
-        del val[0]
-    data_list = json.dumps({"data": list_})
-    print(data_list)
-    return data_list
+val = json.dumps({"xy": [(1, -5.5),(1.2, -4.7),(2.1, 4.1),(3, 5.5),(3.2, 5.7),(4.1, 8.1),(4.5, 1.5),(4.7, 4.9),(4.8, 4.1),(4.9, 5.5),(5.1, 5.7),(5.4, 8.1)]
+                  })
+# with open('points') as file:
+#     val = file.readline()
 
 
 class ServerWS(object):
@@ -21,10 +14,11 @@ class ServerWS(object):
 
     @staticmethod
     async def graph(websocket, path):
+        js = json.loads(val)
         try:
-            list_ = []
-            await websocket.send(str(val))
-            # time.sleep(0.4)
+            for xy in js['xy']:
+                await websocket.send(str(xy))
+                time.sleep(0.1)
                 # list_.append(item)
         except Exception as e:
             print(e)
