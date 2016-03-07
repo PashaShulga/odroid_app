@@ -58,11 +58,13 @@ def index():
         thread = Thread(target=background_thread)
         thread.daemon = True
         thread.start()
-    return render_template('index.html')
+    data = {
+        'velocity': [v for v in range(5, 21)],
+        'ramp': [r for r in range(1, 11)],
+        'dwell': [d for d in range(1, 11)]
+            }
+    return render_template('graph.html', velocity=data)
 
-@app.route('/graph')
-def graph():
-    return render_template('graph.html')
 
 @socketio.on('my event', namespace='/test')
 def test_message(message):

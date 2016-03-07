@@ -10,8 +10,8 @@ import sys
 import time
 
 usb = init()			# init the USB IO board
-print(rom_version(usb))		# print rom version
-print("---------- output -----------")
+# print(rom_version(usb))		# print rom version
+# print("---------- output -----------")
 
 # toggle_led(usb)			# toggle the LED
 
@@ -20,11 +20,15 @@ print("---------- output -----------")
 # print(a)
 
 #-- gpio in --
-gpio_init(usb, rd7, dir_input)	# configure gpio RD7 as input
-a = gpio_in(usb,rd7)		# read the GPIO pin RD7
-# gpio_init(usb, 1, dir_input)
-# a = gpio_in(usb, 1)
-print(a)
+while True:
+    gpio_init(usb, rd4, dir_input)	# configure gpio RD7 as input
+    a = gpio_in(usb,rd4)		# read the GPIO pin RD7
+    print(a)
+    time.sleep(500/1000)
+    gpio_init(usb, rd4, dir_output)
+    a = gpio_out(usb, rd4)
+    print(a)
+    time.sleep(500/1000)
 
 
 #-- analog in --
@@ -54,9 +58,9 @@ print(a)
 #------------- Special Function Registers ---------------
 # SFR register access:  refer to page 88-95 of SPEC doc
 # where ANSELB register is: 0xf5c  (only use lower byte to access)
-ANSELB = 0x5c
-sfr_set_regbit(usb, ANSELB, 1, 0)	# RB1 is digital
+# ANSELB = 0x5c
+# sfr_set_regbit(usb, ANSELB, 1, 0)	# RB1 is digital
 
 # where 0xfc9 is SS1BUF serial port buffer
-a = sfr_get_reg(usb, 0xc9)	# SS1BUF register on PIC18
-print(a)
+# a = sfr_get_reg(usb, 0xc9)	# SS1BUF register on PIC18
+# print(a)
