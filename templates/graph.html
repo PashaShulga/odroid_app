@@ -1,8 +1,6 @@
 <!DOCTYPE html>
 <html>
 <head>
-
-    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
     <script type="text/javascript" src="../static/js/canvasjs.min.js"></script>
     <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/socket.io/1.3.5/socket.io.min.js"></script>
     <link rel="stylesheet" type="text/css" href="../static/view.css" media="all">
@@ -18,13 +16,19 @@
                 $('#log').append('<br>' + $('<div/>').text('Received #' + msg.count + ': ' + msg.data).html());
             });
             // event handler for new connections
-            socket.on('connect', function () {
-                socket.emit('my event', {data: 'I\'m connected!'});
-            });
+            //socket.on('connect', function () {
+            //    socket.emit('my event', {data: 'I\'m connected!'});
+            //});
             // handlers for the different forms in the page
             // these send data to the server in a variety of ways
-            $('form#emit').submit(function (event) {
-                socket.emit('my event', {data: $('#emit_data').val()});
+            $('form#form_1110336').submit(function (event) {
+                socket.emit('my event', JSON.stringify({
+                    velocity1: $('#velocity1').val(),
+                    velocity12: $('#velocity2').val(),
+                    ramp: $('#ramp').val(),
+                    dwell: $('#dwell').val()
+                })
+                );
                 return false;
             });
             $('form#disconnect').submit(function (event) {
@@ -33,19 +37,20 @@
             });
         });
     </script>
+    <title>Bruce</title>
 </head>
 
 <body>
 <div id="form_container">
     <h1><a>Untitled Form</a></h1>
     <div id="chartContainer" style="text-align: right; height: 350px; width:70%;"></div>
-    <form id="form_1110336" class="appnitro" method="post" action="">
+    <form id="form_1110336" class="appnitro" method="post" action="#">
         <ul>
             <li id="li_3">
                 <label class="description" for="element_3">Velocity 1 </label>
                 <div>
-                    <select class="element select medium" id="element_3" name="element_3">
-                        {% for item in velocity.velocity %}
+                    <select class="element select medium" id="velocity1" name="velocity1">
+                        {% for item in data.velocity %}
                             <option value="{{ item }}">{{ item }} mm/sec</option>
                         {% endfor %}
                     </select>
@@ -54,8 +59,8 @@
             <li id="li_4">
                 <label class="description" for="element_4">Velocity 2 </label>
                 <div>
-                    <select class="element select medium" id="element_4" name="element_4">
-                        {% for item in velocity.velocity %}
+                    <select class="element select medium" id="velocity2" name="velocity2">
+                        {% for item in data.velocity %}
                             <option value="{{ item }}">{{ item }} mm/sec</option>
                         {% endfor %}
                     </select>
@@ -64,8 +69,8 @@
             <li id="li_5">
                 <label class="description" for="element_5">Ramp </label>
                 <div>
-                    <select class="element select medium" id="element_5" name="element_5">
-                        {% for item in velocity.ramp %}
+                    <select class="element select medium" id="ramp" name="ramp">
+                        {% for item in data.ramp %}
                             <option value="{{ item }}">{{ item }} mm/sec</option>
                         {% endfor %}
                     </select>
@@ -74,8 +79,8 @@
             <li id="li_6">
                 <label class="description" for="element_6">Dwell </label>
                 <div>
-                    <select class="element select medium" id="element_6" name="element_6">
-                        {% for item in velocity.dwell %}
+                    <select class="element select medium" id="dwell" name="dwell">
+                        {% for item in data.dwell %}
                             <option value="{{ item }}">{{ item }} mm/sec</option>
                         {% endfor %}
                     </select>
@@ -99,15 +104,11 @@
             <li class="buttons">
                 <input type="hidden" name="form_id" value="1110336"/>
 
-                <input id="saveForm" class="button_text" type="submit" name="submit" value="Submit"/>
+                <input id="start" class="button_text" type="submit" name="submit" value="Start"/>
+                <input id="stop" class="button_text" type="submit" name="submit" value="Stop"/>
+                <input id="clear" class="button_text" type="submit" name="submit" value="Clear"/>
             </li>
         </ul>
-    </form>
-
-    <h2>Send:</h2>
-    <form id="emit" method="POST" action='#'>
-        <input type="text" name="emit_data" id="emit_data" placeholder="Message">
-        <input type="submit" value="Echo">
     </form>
 
     <form id="disconnect" method="POST" action="#">
