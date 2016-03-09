@@ -20,24 +20,23 @@ usb = init()			# init the USB IO board
 # print(a)
 
 #-- gpio in --
-while True:
-    gpio_init(usb, rd4, dir_input)	# configure gpio RD7 as input
-    a = gpio_in(usb,rd4)		# read the GPIO pin RD7
-    print(a)
-    time.sleep(500/1000)
-    gpio_init(usb, rd4, dir_output)
-    a = gpio_out(usb, rd4)
-    print(a)
-    time.sleep(500/1000)
+# while True:
+#     gpio_init(usb, rd4, dir_input)	# configure gpio RD7 as input
+#     a = gpio_in(usb,rd4)		# read the GPIO pin RD7
+#     print(a)
+#     time.sleep(500/1000)
+#     gpio_init(usb, rd4, dir_output)
+#     a = gpio_out(usb, rd4)
+#     print(a)
+#     time.sleep(500/1000)
 
 
 #-- analog in --
-# a = adc_ra1(usb)		# do ADC conversion on pin RA1
-# print(a)
-# while True:
-# 	b = adc_ra1(usb)
-# 	print(round(b/310, 2))
-# 	time.sleep(0.1)
+
+while True:
+	b = adc_ra0(usb)
+	print(round(b/310, 2))
+	time.sleep(0.1)
 
 #------------- serial port (UART) functionality ----------
 # LCD on serial port (UART IO to a serial attached LCD)
