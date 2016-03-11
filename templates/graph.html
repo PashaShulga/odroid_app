@@ -79,15 +79,12 @@
         </ul>
     </form>
 
-    <form id="disconnect" method="POST" action="#">
-        <input type="submit" value="Disconnect">
-    </form>
     <h2>Receive:</h2>
     <div id="log"></div>
 
     <script class="code" type="text/javascript">
-        var sock = (function () {
-            var socket = new WebSocket('ws://localhost:8765');
+        var websocket = new WebSocket('ws://localhost:8765');
+        (function () {
             var MAX_X_POINTS_LEN = 25;
             var updateInterval = 100;
             var dataPoints = []; // dataPoints
@@ -102,7 +99,7 @@
                 }]
             });
 
-            socket.onmessage = function (event) {
+            websocket.onmessage = function (event) {
                 var points = JSON.parse(event.data);
 
                 dataPoints.push({
@@ -123,6 +120,10 @@
             setInterval(reRenderChart, updateInterval);
 
         }());
+
+        function sendingData(message){
+            websocket.send(message)
+        }
 
         $(document).ready(function () {
             namespace = '/test'; // change to an empty string to use the global namespace
@@ -148,18 +149,30 @@
                     dwell: $('#dwell').val()
                 })
                 );
+                sendingData('start');
                 return false;
             });
 
             $('#stop').click(function(event){
+                socket.emit(
+                        'my event', JSON.stringify({
+                            "event": "stop"
+                        })
+                );
+                sendingData('stop');
 
                 return false;
             });
 
-            $('form#disconnect').submit(function (event) {
-                socket.emit('disconnect request');
-                return false;
-            });
+{#            $('#clear').click(function(event){#}
+{#                socket.emit(#}
+{#                        'my event', JSON.stringify({#}
+{#                            "event": "clear"#}
+{#                        })#}
+{#                );#}
+{#                return false;#}
+{#            });#}
+
         });
     </script>
     </div>

@@ -34,6 +34,7 @@ from flask import Flask, render_template, session, request
 from flask_socketio import SocketIO, emit, join_room, leave_room, \
     close_room, rooms, disconnect
 
+
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret!'
 socketio = SocketIO(app, async_mode=async_mode)
@@ -68,6 +69,7 @@ def index():
 
 @socketio.on('my event', namespace='/test')
 def test_message(message):
+    message = json.loads(message)
     print(message)
     # session['receive_count'] = session.get('receive_count', 0) + 1
     # emit('my response',
