@@ -6,15 +6,6 @@ import sys
 import time
 
 
-# Markham Thomas 2015
-# This version is under heavy development
-# You can add your test code to the bottom
-# below the === end of module statement, or
-# externally call the module
-#
-# ---- This version adds a python class for constants
-
-
 class Bunch(dict):
     def __init__(self, d={}):
         dict.__init__(self, d)

@@ -10,56 +10,23 @@ import sys
 import time
 
 usb = init()			# init the USB IO board
-# print(rom_version(usb))		# print rom version
-# print("---------- output -----------")
-
-# toggle_led(usb)			# toggle the LED
-
-#-- pushbutton on board status --
-# a = read_switch(usb)		# read the switch status
-# print(a)
-
-#-- gpio in --
-# while True:
-#     gpio_init(usb, rd4, dir_input)	# configure gpio RD7 as input
-#     a = gpio_in(usb,rd4)		# read the GPIO pin RD7
-#     print(a)
-#     time.sleep(500/1000)
-#     gpio_init(usb, rd4, dir_output)
-#     a = gpio_out(usb, rd4)
-#     print(a)
-#     time.sleep(500/1000)
 
 
-#-- analog in --
+ior = {'ANSELA': 0x5b, 'ANSELB' : 0x5c ,'ANSELC' : 0x5d, 'ANSELD' : 0x5e, 'ANSELE' : 0x5f,
+	   'PORTA' : 0x80, 'PORTB' :  0x81, 'PORTC'  : 0x82, 'PORTD'  : 0x83, 'PORTE'  : 0x84,
+	  'TRISA' : 0x92, 'TRISB' :  0x93, 'TRISC'  : 0x94, 'TRISD'  : 0x95, 'TRISE'  : 0x96,
+	  'LATA'  : 0x89, 'LATB'  :  0x8a, 'LATC'   : 0x8b, 'LATD'   : 0x8c, 'LATE'   : 0x8d }
 
-while True:
-	b = adc_ra0(usb)
-	print(round(b/310, 2))
-	time.sleep(0.1)
 
-#------------- serial port (UART) functionality ----------
-# LCD on serial port (UART IO to a serial attached LCD)
-# ser_putc(usb,chr(0xfe))		# clear LCD screen
-# ser_putc(usb,chr(0x01))
-# ser_putc(usb,chr(0xfe))		# block cursor
-# ser_putc(usb,chr(0x0d))
-# ser_puts(usb,"Hello World")
-# ser_puts(usb,chr(0xfe) + chr(192))	# move to next line
-# ser_puts(usb,"From Odroid-x2")
-#
-# if (ser_test(usb)):		# check if incoming char on UART
-# 	a = ser_getc(usb)
-# 	print(a)
-# else:
-# 	print("no")
+sfr_set_regbit(usb, ior['ANSELA'], 5, 0)	# RA5 is digital
+sfr_set_regbit(usb, ior['ANSELA'], 4, 0)	# RA4 is digital
+sfr_set_regbit(usb, ior['ANSELA'], 1, 0)	# RA1 is digital
+sfr_set_regbit(usb, ior['ANSELB'], 4, 0)	# RB4 is digital
 
-#------------- Special Function Registers ---------------
-# SFR register access:  refer to page 88-95 of SPEC doc
-# where ANSELB register is: 0xf5c  (only use lower byte to access)
-# ANSELB = 0x5c
-# sfr_set_regbit(usb, ANSELB, 1, 0)	# RB1 is digital
+sfr_set_regbit(usb, ior['TRISA'],  5, 0)	# RA5 pin 0 - output, 1 - input
+sfr_set_regbit(usb, ior['TRISA'],  4, 1)	# RA4 pin 0 - output, 1 - input
+sfr_set_regbit(usb, ior['TRISA'],  1, 1)	# RA1 pin 0 - output, 1 - input
+sfr_set_regbit(usb, ior['TRISB'],  4, 0)	# RA4 pin 0 - output, 1 - input
 
-# where 0xfc9 is SS1BUF serial port buffer
-# a = sfr_get_reg(usb, 0xc9)	# SS1BUF register on PIC18
-# print(a)
+a = sfr_get_regbit(usb, ior['PORTA'],  1)	# get the value
+print("Pin value:", a)
