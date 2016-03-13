@@ -30,3 +30,5 @@ sfr_set_regbit(usb, ior['TRISB'],  4, 0)	# RA4 pin 0 - output, 1 - input
 
 a = sfr_get_regbit(usb, ior['PORTA'],  1)	# get the value
 print("Pin value:", a)
+
+ser_putc(usb, "Zgityug9uogoyuhoihoouD")
