@@ -57,15 +57,13 @@
             <li id="li_1">
                 <label class="description" for="element_1">Upper </label>
                 <div>
-                    <input id="element_1" name="element_1" class="element text medium" type="text" maxlength="255"
-                           value=""/>
+                    <input id="upper" name="upper" class="element text medium" type="text" maxlength="255" value=""/>
                 </div>
             </li>
             <li id="li_2">
-                <label class="description" for="element_2">Lower </label>
+                <label class="description" for="element_2" id="element_2">Lower </label>
                 <div>
-                    <input id="element_2" name="element_2" class="element text medium" type="text" maxlength="255"
-                           value=""/>
+                    <input id="lower" name="lower" class="element text medium" type="text" maxlength="255" value=""/>
                 </div>
             </li>
 
@@ -142,24 +140,27 @@
             // handlers for the different forms in the page
             // these send data to the server in a variety of ways
             $('form#form_1110336').submit(function (event) {
-                socket.emit('my event', JSON.stringify({
+                var data = JSON.stringify({
                     velocity1: $('#velocity1').val(),
-                    velocity12: $('#velocity2').val(),
+                    velocity2: $('#velocity2').val(),
                     ramp: $('#ramp').val(),
-                    dwell: $('#dwell').val()
-                })
-                );
-                sendingData('start');
+                    dwell: $('#dwell').val(),
+                    start: true,
+                    upper: $('#upper').val(),
+                    lower: $('#lower').val()
+                });
+                socket.emit('my event', data);
+
+                sendingData(data);
                 return false;
             });
 
             $('#stop').click(function(event){
-                socket.emit(
-                        'my event', JSON.stringify({
-                            "event": "stop"
-                        })
-                );
-                sendingData('stop');
+                var data = JSON.stringify({
+                            start: false
+                        });
+                socket.emit('my event', data);
+                sendingData(data);
 
                 return false;
             });

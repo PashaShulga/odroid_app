@@ -28,9 +28,7 @@ RB4 = sfr_get_regbit(usb, ior['PORTB'], 4)
 
 
 class Handler(object):
-
     def __init__(self):
-        websockets.serve(self.handler, 'localhost', 8765)
         self.ramp = '0'
         self.velocity1 = '0'
         self.velocity2 = '0'
@@ -38,36 +36,45 @@ class Handler(object):
         self.limit_upper = '0'
         self.limit_lower = '0'
 
-    async def xy(self):
+    def check_port(self):
         try:
+            
             if RA5 == 0:
                 ser_puts(usb, "ZA"+self.ramp)
             time.sleep(0.01)
+
             if RA5 == 0:
                 ser_puts(usb, "ZD"+self.velocity1)
             time.sleep(0.01)
+            
             if RA5 == 0:
                 ser_puts(usb, "ZF"+self.velocity2)
             time.sleep(0.01)
+            
             if RA5 == 0:
                 ser_puts(usb, "ZB"+self.limit_upper)
             time.sleep(0.01)
+            
             if RA5 == 0:
                 ser_puts(usb, "ZE"+self.limit_lower)
             time.sleep(0.01)
+            
             if RA5 == 0 and self.dwell != '0':
                 ser_puts(usb, "ZJ"+self.dwell)
             time.sleep(0.01)
+            
             if RA5 == 0:
                 ser_puts(usb, "H")
             sfr_set_regbit(usb, ior['TRISA'],  5, 0)
         except Exception as e:
             print(e)
 
-    async def graph_data(self):
+    async def set_graph_data(self, x):
         try:
+            y = 0.0
             if RA1 == 1:
-                ser_getc(usb)
+                y = ser_getc(usb)
+            return json.dumps((x, float(y)))
         except Exception as e:
             print(e)
 
@@ -75,18 +82,25 @@ class Handler(object):
         x = 0
         while True:
             check_first_click = await websocket.recv()
-            if check_first_click == "start":
+            check_first_click = json.loads(check_first_click)
+            if check_first_click['start']:
+                self.velocity1 = check_first_click['velocity1']
+                self.velocity2 = check_first_click['velocity2']
+                self.ramp = check_first_click['ramp']
+                self.dwell = check_first_click['dwell']
+                self.limit_lower = check_first_click['lower']
+                self.limit_upper = check_first_click['upper']
                 sfr_set_regbit(usb, ior['TRISA'],  5, 1)
+                self.check_port()
                 while True:
-                    tasks = [asyncio.ensure_future(websocket.recv()), asyncio.ensure_future(Handler.xy(self))]
+                    tasks = [asyncio.ensure_future(websocket.recv()), asyncio.ensure_future(self.set_graph_data(x))]
                     done, panding = await asyncio.wait(tasks, return_when=asyncio.FIRST_COMPLETED)
                     if tasks[0] in done:
-                        if tasks[0].result() == "stop":
+                        if json.loads(tasks[0].result())['start'] is False:
                             sfr_set_regbit(usb, ior['TRISA'],  5, 0)
                             break
                     else:
                         tasks[0].cancel()
-
                     if tasks[1] in done:
                         mess = tasks[1].result()
                         await websocket.send(str(mess))
@@ -95,7 +109,10 @@ class Handler(object):
                         tasks[1].cancel()
                     x += 1
 
+start_server = websockets.serve(Handler().handler, 'localhost', 8765)
 
 loop = asyncio.get_event_loop()
-loop.run_until_complete(Handler())
+
+loop.run_until_complete(start_server)
+
 loop.run_forever()

@@ -6,7 +6,6 @@
 #   Refer to the other python programs for more
 # in depth examples
 from hk_usb_io import *		# import interface module
-import sys
 import time
 
 usb = init()			# init the USB IO board
