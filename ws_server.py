@@ -71,9 +71,13 @@ class Handler(object):
 
     async def set_graph_data(self, x):
         try:
-            y = 0.0
-            if RA1 == 1:
-                y = ser_getc(usb)
+            # y = 0.0
+            # if RA1 == 1:
+            #     y = ser_getc(usb)
+            # if RA1 == 0:
+            #     y = ser_getc(usb)
+            y = ser_getc(usb)
+            print(y)
             return json.dumps((x, float(y)))
         except Exception as e:
             print(e)
