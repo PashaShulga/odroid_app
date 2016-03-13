@@ -21,14 +21,48 @@ sfr_set_regbit(usb, ior['TRISA'],  4, 1)	# RA4 pin 0 - output, 1 - input
 sfr_set_regbit(usb, ior['TRISA'],  1, 1)	# RA1 pin 0 - output, 1 - input
 sfr_set_regbit(usb, ior['TRISB'],  4, 0)	# RA4 pin 0 - output, 1 - input
 
+RA5 = sfr_get_regbit(usb, ior['PORTA'], 5)
+RA1 = sfr_get_regbit(usb, ior['PORTA'], 1)
+RA4 = sfr_get_regbit(usb, ior['PORTA'], 4)
+RB4 = sfr_get_regbit(usb, ior['PORTB'], 4)
+
 
 class Handler(object):
+
     def __init__(self):
         self.serv = websockets.serve(self.handler, 'localhost', 8765)
+        self.ramp = '0'
+        self.velocity1 = '0'
+        self.velocity2 = '0'
+        self.dwell = '0'
+        self.limit_upper = '0'
+        self.limit_lower = '0'
 
     async def xy(self):
-
-        return json.dumps()
+        try:
+            if RA5 == 0:
+                ser_puts(usb, "ZA"+self.ramp)
+            time.sleep(0.01)
+            if RA5 == 0:
+                ser_puts(usb, "ZD"+self.velocity1)
+            time.sleep(0.01)
+            if RA5 == 0:
+                ser_puts(usb, "ZF"+self.velocity2)
+            time.sleep(0.01)
+            if RA5 == 0:
+                ser_puts(usb, "ZB"+self.limit_upper)
+            time.sleep(0.01)
+            if RA5 == 0:
+                ser_puts(usb, "ZE"+self.limit_lower)
+            time.sleep(0.01)
+            if RA5 == 0 and self.dwell != '0':
+                ser_puts(usb, "ZJ"+self.dwell)
+            time.sleep(0.01)
+            if RA5 == 0:
+                ser_puts(usb, "H")
+            sfr_set_regbit(usb, ior['TRISA'],  5, 0)
+        except Exception as e:
+            print(e)
 
     async def handler(self, websocket, path):
         x = 0
