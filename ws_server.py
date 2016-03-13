@@ -30,7 +30,7 @@ RB4 = sfr_get_regbit(usb, ior['PORTB'], 4)
 class Handler(object):
 
     def __init__(self):
-        self.serv = websockets.serve(self.handler, 'localhost', 8765)
+        websockets.serve(self.handler, 'localhost', 8765)
         self.ramp = '0'
         self.velocity1 = '0'
         self.velocity2 = '0'
@@ -64,17 +64,25 @@ class Handler(object):
         except Exception as e:
             print(e)
 
+    async def graph_data(self):
+        try:
+            if RA1 == 1:
+                ser_getc(usb)
+        except Exception as e:
+            print(e)
+
     async def handler(self, websocket, path):
         x = 0
         while True:
             check_first_click = await websocket.recv()
             if check_first_click == "start":
+                sfr_set_regbit(usb, ior['TRISA'],  5, 1)
                 while True:
-                    b = adc_ra0(usb)
                     tasks = [asyncio.ensure_future(websocket.recv()), asyncio.ensure_future(Handler.xy(self))]
                     done, panding = await asyncio.wait(tasks, return_when=asyncio.FIRST_COMPLETED)
                     if tasks[0] in done:
                         if tasks[0].result() == "stop":
+                            sfr_set_regbit(usb, ior['TRISA'],  5, 0)
                             break
                     else:
                         tasks[0].cancel()

@@ -173,8 +173,10 @@ def ser_putc(dev, schar):  # send a char to the serial port
 
 
 def ser_puts(dev, strval):  # send a string to the serial port
-    a = map(ord, strval)
-    a = [a.__next__()]
+    b = [map(ord, strval_res) for strval_res in strval]
+    a = []
+    for result in b:
+        a.append(result.__next__())
     a.insert(0, u_uss)
     a.append(0)
     dev.write(1, a, 100)
